@@ -90,7 +90,7 @@ Following the **Waterfall Model** with phases:
 5. Deployment Phase ⏳
 
 ## Course Information
-- **Course**: SSW-555 (Agile Methods)
+- **Course**: SSW-500 
 - **Institution**: Stevens Institute of Technology
 - **Semester**: Fall 2024
 
