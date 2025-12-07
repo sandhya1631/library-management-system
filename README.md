@@ -12,15 +12,13 @@ The Library Database Management System automates library operations using Flask 
 ## Technologies Used
 - **Backend**: Python 3.x, Flask
 - **Database**: SQLite
-- **Frontend**: HTML, CSS, Bootstrap 5
-- **Version Control**: Git, GitHub
+- **Frontend**: HTML, CSS, Bootstrap 5, JavaScript
+- **Version Control**: Git, GitHub, VS Code
 
 ## Features (Planned)
 - 📚 Book Management (Add, Edit, Delete, Search)
 - 👥 Member Management (Registration, Profile Management)
 - 🔄 Transaction Management (Issue, Return, Track)
-- 💰 Automatic Fine Calculation
-- 📊 Reporting Dashboard
 - 🔒 Role-based Access Control
 
 ## Database Schema
@@ -28,8 +26,6 @@ The system uses a normalized relational database with 5 main tables:
 - **Books**: Store book information
 - **Members**: Store member information
 - **Transactions**: Track book borrowing
-- **Fines**: Calculate and track fines
-- **Reservations**: Manage book reservations
 
 ## Installation
 
@@ -72,14 +68,12 @@ library_system/
 ```
 
 ## Current Progress
-✅ Requirement Analysis  
-✅ Database Design (ER Diagram)  
+✅ Requirement Analysis    
 ✅ Flask Application Setup  
 ✅ Database Schema Creation  
-🔄 CRUD Operations (In Progress)  
-⏳ Transaction Management (Planned)  
-⏳ Fine Calculation (Planned)  
-⏳ Reporting Features (Planned)  
+🔄 CRUD Operations
+⏳ Transaction Management  
+⏳ Reporting Features
 
 ## Methodology
 Following the **Waterfall Model** with phases:
@@ -92,7 +86,7 @@ Following the **Waterfall Model** with phases:
 ## Course Information
 - **Course**: SSW-500 
 - **Institution**: Stevens Institute of Technology
-- **Semester**: Fall 2024
+- **Semester**: Fall 2025
 
 ## License
 This project is developed for educational purposes as part of coursework at Stevens Institute of Technology.
@@ -102,5 +96,3 @@ For questions or collaboration:
 - Vishal Rathod - [GitHub Profile]
 - Sandhya Gottimukkala - [GitHub Profile]
 
----
-*Last Updated: November 18, 2024*
