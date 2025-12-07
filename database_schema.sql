@@ -1,5 +1,15 @@
 -- Library Database Management System Schema
 
+-- Users Table for Authentication
+CREATE TABLE IF NOT EXISTS users (
+    user_id INTEGER PRIMARY KEY AUTOINCREMENT,
+    username VARCHAR(50) UNIQUE NOT NULL,
+    email VARCHAR(100) UNIQUE NOT NULL,
+    password VARCHAR(255) NOT NULL,
+    full_name VARCHAR(100),
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
 -- Books Table
 CREATE TABLE IF NOT EXISTS books (
     book_id INTEGER PRIMARY KEY AUTOINCREMENT,
