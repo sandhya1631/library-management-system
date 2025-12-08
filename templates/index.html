@@ -16,6 +16,7 @@
                 <a class="nav-link" href="/books">Books</a>
                 <a class="nav-link" href="/members">Members</a>
                 <a class="nav-link" href="/transactions">Transactions</a>
+                <a class="nav-link" href="/reservations">Reservations</a>
             </div>
             <div class="navbar-nav ms-auto">
                 {% if session.get('username') %}
@@ -86,6 +87,15 @@
                         <h5 class="card-title">🔄 Transactions</h5>
                         <p class="card-text">Issue and return books</p>
                         <a href="/transactions" class="btn btn-primary">View Transactions</a>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="card">
+                    <div class="card-body">
+                        <h5 class="card-title">📖 Reservations</h5>
+                        <p class="card-text">Reserve unavailable books</p>
+                        <a href="/reservations" class="btn btn-primary">View Reservations</a>
                     </div>
                 </div>
             </div>

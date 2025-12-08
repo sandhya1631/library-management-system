@@ -9,8 +9,9 @@ app.config['SECRET_KEY'] = 'your-secret-key-here'
 
 # Database connection
 def get_db_connection():
-    conn = sqlite3.connect('library.db')
+    conn = sqlite3.connect('library.db', timeout=30.0, check_same_thread=False)
     conn.row_factory = sqlite3.Row
+    conn.execute('PRAGMA journal_mode=WAL')
     return conn
 
 # Initialize database
@@ -174,12 +175,26 @@ def edit_book(book_id):
     publisher = request.form['publisher']
     year = request.form['year']
     category = request.form['category']
-    total_copies = request.form['total_copies']
+    new_total_copies = int(request.form['total_copies'])
     
     conn = get_db_connection()
+
+    book = conn.execute('SELECT * FROM books WHERE book_id = ?', (book_id,)).fetchone()
+    old_total_copies = book['total_copies']
+    old_available_copies = book['available_copies']
+    
+    difference = new_total_copies - old_total_copies
+    new_available_copies = old_available_copies + difference
+    
+    if new_available_copies < 0:
+        new_available_copies = 0
+    
+    # Update book
     conn.execute('''UPDATE books SET isbn=?, title=?, author=?, publisher=?, 
-                    year=?, category=?, total_copies=? WHERE book_id=?''',
-                 (isbn, title, author, publisher, year, category, total_copies, book_id))
+                    year=?, category=?, total_copies=?, available_copies=? 
+                    WHERE book_id=?''',
+                 (isbn, title, author, publisher, year, category, 
+                  new_total_copies, new_available_copies, book_id))
     conn.commit()
     conn.close()
     
@@ -392,6 +407,101 @@ def return_book(transaction_id):
     
     conn.close()
     return redirect(url_for('transactions'))
+
+
+# View all reservations
+@app.route('/reservations')
+@login_required
+def reservations():
+    conn = get_db_connection()
+    reservations = conn.execute('''
+        SELECT r.*, b.title, b.author, m.name as member_name, b.available_copies
+        FROM reservations r
+        JOIN books b ON r.book_id = b.book_id
+        JOIN members m ON r.member_id = m.member_id
+        ORDER BY r.reservation_date DESC
+    ''').fetchall()
+    conn.close()
+    return render_template('reservations.html', reservations=reservations)
+
+# Reserve a book
+@app.route('/books/reserve/<int:book_id>')
+@login_required
+def reserve_book(book_id):
+    conn = get_db_connection()
+    
+    # Check if book exists
+    book = conn.execute('SELECT * FROM books WHERE book_id = ?', (book_id,)).fetchone()
+    
+    if not book:
+        flash('Book not found!', 'danger')
+        conn.close()
+        return redirect(url_for('books'))
+    
+    # Check if book is available
+    if book['available_copies'] > 0:
+        flash('This book is available! You can issue it directly.', 'info')
+        conn.close()
+        return redirect(url_for('books'))
+    
+    # Get all members to choose from
+    members = conn.execute('SELECT * FROM members WHERE status = "active" ORDER BY name').fetchall()
+    conn.close()
+    
+    return render_template('reserve_book.html', book=book, members=members)
+
+# Handle reservation submission
+@app.route('/books/reserve/<int:book_id>', methods=['POST'])
+@login_required
+def reserve_book_post(book_id):
+    member_id = request.form['member_id']
+    reservation_date = datetime.now().date()
+    
+    conn = get_db_connection()
+    
+    # Check if member already has a reservation for this book
+    existing = conn.execute('''SELECT * FROM reservations 
+                              WHERE book_id = ? AND member_id = ? AND status = "pending"''',
+                           (book_id, member_id)).fetchone()
+    
+    if existing:
+        flash('You already have a pending reservation for this book!', 'warning')
+    else:
+        # Create reservation
+        conn.execute('''INSERT INTO reservations (book_id, member_id, reservation_date, status)
+                        VALUES (?, ?, ?, ?)''',
+                     (book_id, member_id, reservation_date, 'pending'))
+        conn.commit()
+        flash('Book reserved successfully! You will be notified when it becomes available.', 'success')
+    
+    conn.close()
+    return redirect(url_for('reservations'))
+
+# Cancel reservation
+@app.route('/reservations/cancel/<int:reservation_id>')
+@login_required
+def cancel_reservation(reservation_id):
+    conn = get_db_connection()
+    conn.execute('UPDATE reservations SET status = ? WHERE reservation_id = ?',
+                ('cancelled', reservation_id))
+    conn.commit()
+    conn.close()
+    
+    flash('Reservation cancelled successfully!', 'info')
+    return redirect(url_for('reservations'))
+
+# Fulfill reservation
+@app.route('/reservations/fulfill/<int:reservation_id>')
+@login_required
+def fulfill_reservation(reservation_id):
+    conn = get_db_connection()
+    conn.execute('UPDATE reservations SET status = ? WHERE reservation_id = ?',
+                ('fulfilled', reservation_id))
+    conn.commit()
+    conn.close()
+    
+    flash('Reservation fulfilled!', 'success')
+    return redirect(url_for('reservations'))
 
 if __name__ == '__main__':
     init_db()
